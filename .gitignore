@@ -1,0 +1,4 @@
+*.sqlite3
+/trash
+*.swp
+*.save
