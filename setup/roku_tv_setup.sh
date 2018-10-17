@@ -1,5 +1,6 @@
 #!/bin/bash
-TV='http://192.168.1.184:8060/keypress/'
+IPADD=$1
+TV="http://$IPADD:8060/keypress/"
 H='Home'
 R='Rev'
 F='Fwd'
@@ -15,6 +16,8 @@ I='Info'
 BS='Backspace'
 SH='Search'
 E='Enter'
+
+#: <<-END
 
 echo "Change script where necessary in case menu items and order change"
 echo "This should be used only on TVs that have been newly setup with no changes made."
@@ -76,4 +79,4 @@ sleep .5
 curl -d '' $TV$S
 sleep .5
 
-
+#END
