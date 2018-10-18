@@ -1,5 +1,5 @@
 /trash
-/content
+/content/*.jpg
 !/content/deomo-*.jpg
 *.sqlite3
 *.swp
