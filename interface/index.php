@@ -36,18 +36,19 @@ try {
 	echo "<div class='swiper-wrapper text-center'>";
 	echo "<!--Sliders Div-->";
 
-    // Output Lines
+	// Output Lines
 /**
-    foreach($result as $row) {
-	echo "<!--Slider-->";
-    	echo "<div class='swiper-slide' id='page-loader' data-slide-bg='content/" . $row['content']  . "' data-preview-bg='content/" . $row['content']  . "'></div>";
-	echo "<!--End Slider-->";
-    }
+	foreach($result as $row) {
+		echo "<!--Slider-->";
+    		echo "<div class='swiper-slide' id='page-loader' data-slide-bg='content/" . $row['content']  . "'></div>";
+		echo "<!--End Slider-->";
+    	}
 **/
 
-echo "<div class='swiper-slide' id='page-loader' data-slide-bg='content/intro-04-1920x955.jpg' data-preview-bg='content/intro-04-1920x955.jpg'></div>";
-echo "<div class='swiper-slide' id='page-loader' data-slide-bg='content/intro-05-1920x955.jpg' data-preview-bg='content/intro-05-1920x955.jpg'></div>";
-echo "<div class='swiper-slide' id='page-loader' data-slide-bg='content/intro-06-1920x955.jpg' data-preview-bg='content/intro-06-1920x955.jpg'></div>";
+        echo "<div class='swiper-slide' id='page-loader' data-slide-bg='content/demo-1.jpg'></div>";
+        echo "<div class='swiper-slide' id='page-loader' data-slide-bg='content/demo-2.jpg'></div>";
+        echo "<div class='swiper-slide' id='page-loader' data-slide-bg='content/demo-3.jpg'></div>";
+        echo "<div class='swiper-slide' id='page-loader' data-slide-bg='content/demo-4.jpg'></div>";
 
 	echo "<!--End Sliders Div-->";
 	echo "</div>";

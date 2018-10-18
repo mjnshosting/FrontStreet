@@ -8,13 +8,34 @@ function create_user_db() {
         });
 }
 
-function upload_file() {
-        $.ajax({
-            url: 'index.php?action=upload',
-            type: 'POST',
-	    data: '',
-        });
-}
+$("form#uploadForm").submit(function(event){
+	event.preventDefault();
+	var feedback = document.getElementById("feedback-conf");
+  	var formData = new FormData($(this)[0]);
+
+//	if ($(content_type).val() && $(ad_type).val() && $(start_date).val() && $(end_date).val() && $(fileToUpload).val() != '') {
+	  $.ajax({
+	    url: 'index.php?action=upload',
+	    type: 'POST',
+	    data: formData,
+	    cache: false,
+	    contentType: false,
+	    processData: false,
+	    success: function (returnFormData) {
+			$('#feedback-conf').html(returnFormData);
+
+	    }
+	  });
+/**
+	} else {
+		feedback.innerHTML = "Please fill in all fields";
+	}
+**/
+
+
+	  return false;
+	});
+
 
 function genRegular(x) {
 	var regularchar = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -50,25 +71,6 @@ function auto_generate_input(page) {
 		document.getElementById("config_input_gb_db_password_repeat").value = autoGenPass;
 		document.getElementById("config_input_gb_db_name").value = autoGenDB;
 	}
-}
-
-function submission() {
-	var feedback = document.getElementById("feedback-conf");
-	var content_type = document.getElementById("content_type");
-	var ad_type = document.getElementById("ad_type");
-	var start_date = document.getElementById("start_date");
-	var end_date = document.getElementById("end_date");
-	var fileToUpload = document.getElementById("fileToUpload");
-
-	if ($(content_type).val() && $(ad_type).val() && $(start_date).val() && $(end_date).val() && $(fileToUpload).val() != '') {
-//		feedback.innerHTML = $(content_type).val() + "</br>" + $(ad_type).val() + "</br>" + $(start_date).val() + "</br>" + $(end_date).val() + "</br>" + $(fileToUpload).val();
-		feedback.innerHTML = "";
-	        upload_file($(content_type).val(),$(ad_type).val(),$(start_date).val(),$(end_date).val(),$(fileToUpload).val());
-
-	} else {
-		feedback.innerHTML = "Please fill in all fields";
-	}
-
 }
 
 $(document).ready(function(){

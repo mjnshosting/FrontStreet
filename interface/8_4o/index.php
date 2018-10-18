@@ -56,10 +56,18 @@ class OneFileLoginApplication
             $this->doRegistration();
             $this->showPageRegistration();
         } else if (isset($_GET["action"]) && $_GET["action"] == "submission") {
-            $this->showPageSubmission();
+/**
+            $this->performUserLoginAction();
+            if ($this->getUserLoginStatus()) {
+                $this->showPageLoggedIn();
+            } else {
+	        $this->showPageSubmission();
+            }
+**/
+	        $this->showPageSubmission();
+
         } else if (isset($_GET["action"]) && $_GET["action"] == "upload") {
             $this->fileUpload();
-            $this->showPageSubmission();
         } else {
             $this->doStartSession();
             $this->performUserLoginAction();
@@ -248,53 +256,63 @@ class OneFileLoginApplication
         return $this->user_is_logged_in;
     }
 
-    //https://www.w3schools.com/php/php_file_upload.asp
-    private function fileUpload()
-    {
+    private function fileUpload() {
+	session_start();
+	if (empty($_SESSION['user_name'])) {
+	    header('Location: index.php');
+	    exit;
+	}
 	$target_dir = "../content/";
 	$target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
 	$uploadOk = 1;
 	$fileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
-	// Check if image file is a actual image or fake image
-//	if(isset($_POST["submit"])) {
-	    $check = getimagesize($_FILES["fileToUpload"]["tmp_name"]);
-	    if($check !== false) {
-	        $this->feedback = "File is valid - " . $check["mime"] . ".";
-	        $uploadOk = 1;
-	    } else {
-	        $this->feedback = "File is not valid.";
-	        $uploadOk = 0;
-	    }
-//	}
-	// Check if file already exists
+
+	if(isset($_POST["submit"])) {
+    		$check = getimagesize($_FILES["fileToUpload"]["tmp_name"]);
+    		if($check !== false) {
+        		echo "File is an image - " . $check["mime"] . ".";
+        		$uploadOk = 1;
+    		} else {
+        		echo "File is not an image.";
+        		$uploadOk = 0;
+    		}
+	}
+
 	if (file_exists($target_file)) {
-	    $this->feedback = "Sorry, file already exists.";
-	    $uploadOk = 0;
+    		echo "Sorry, file already exists.";
+    		$uploadOk = 0;
 	}
-	// Check file size
-	if ($_FILES["fileToUpload"]["size"] > 500000) {
-	    $this->feedback = "Sorry, your file is too large.";
-	    $uploadOk = 0;
+
+	if ($_FILES["fileToUpload"]["size"] > 50000000) {
+    		echo "Sorry, your file is too large. </br> Max file size is 50MBs";
+    		$uploadOk = 0;
 	}
-	// Allow certain file formats
-	if($fileType != "jpg" && $fileType != "png" && $fileType != "jpeg"
-	&& $fileType != "gif" && $fileType != "webm" && $fileType != "avi" 
-	&& $fileType != "flv" && $fileType != "wmv" && $fileType != "mp4" 
-	&& $fileType != "ogv" && $fileType != "ogg" && $fileType != "mpg" 
-	&& $fileType != "mpeg" ) {
-	    $this->feedback = "Only JPG, JPEG, PNG, GIF, WEBM, AVI, FLV, WMV, MP4, MPG, MPEG, OGV, & OGG files are allowed.";
-	    $uploadOk = 0;
+
+    	if($fileType != "jpg" && $fileType != "png" && $fileType != "jpeg"
+    	&& $fileType != "gif" && $fileType != "webm" && $fileType != "avi"
+    	&& $fileType != "flv" && $fileType != "wmv" && $fileType != "mp4"
+    	&& $fileType != "ogv" && $fileType != "ogg" && $fileType != "mpg"
+    	&& $fileType != "mpeg" ) {
+        	echo "Only JPG, JPEG, PNG, GIF, WEBM, AVI, FLV, WMV, MP4, MPG, MPEG, OGV, & OGG files are allowed.";
+            	$uploadOk = 0;
 	}
-	// Check if $uploadOk is set to 0 by an error
+
 	if ($uploadOk == 0) {
-	    $this->feedback = "Sorry, your file was not uploaded.";
-	// if everything is ok, try to upload file
+    		echo "Sorry, your file was not uploaded.";
 	} else {
-	    if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
-	        $this->feedback = "The file ". basename( $_FILES["fileToUpload"]["name"]). " has been uploaded.";
-	    } else {
-	        $this->feedback = "Sorry, there was an error uploading your file.";
-	    }
+    		if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
+        		echo "The file ". basename( $_FILES["fileToUpload"]["name"]). " has been uploaded.";
+
+/**
+	echo $_POST['content_type'];
+	echo $_POST['ad_type'];
+	echo strtotime($_POST['start_date']);
+	echo strtotime($_POST['end_date']);
+	echo basename( $_FILES["fileToUpload"]["name"]);
+**/
+    		} else {
+        		echo "Sorry, there was an error uploading your file.";
+    		}
 	}
     }
 
@@ -405,6 +423,13 @@ class OneFileLoginApplication
 
     private function showPageSubmission()
     {
+/**
+	session_start();
+	if (empty($_SESSION['user_name'])) {
+	    header('Location: index.php');
+	    exit;
+	}
+**/
         echo "<html>";
         echo "<head>";
         echo "<title>Front Street Submission</title>";
@@ -421,38 +446,38 @@ class OneFileLoginApplication
 	echo "<div align='center'><img src='../images/logo.png' alt='Front Street' style='width:128px;height:auto;padding:10px;'></div>";
         echo "<h1>Front Street</br>Submission</h1>";
         echo "<div align='center' style='width: 70%; margin: 0 auto; padding: 6% 0 9% 0;'>";
-        echo "<select id='content_type'>";
+	echo "<form id='uploadForm'>";
+        echo "<select id='content_type' name='content_type'>";
 	echo "<option value=''>Select Content Type</option>";
 	echo "<option value='image'>Image</option>";
 	echo "<option value='video'>Video</option>";
         echo "</select>";
 	echo "</br>";
-        echo "<select id='ad_type'>";
+        echo "<select id='ad_type' name='ad_type'>";
 	echo "<option value=''>Select Ad Type</option>";
 	echo "<option value='tenant'>Tenant</option>";
 	echo "<option value='business'>Business</option>";
 	echo "<option value='sale'>Sale</option>";
 	echo "<option value='announcement'>Announcement</option>";
         echo "</select>";
-	echo "Start: <input type='date' id='start_date' style='width:70%'>";
+	echo "Start: <input type='date' id='start_date' name='start_date' style='width:70%'>";
 	echo "</br>";
-	echo "End: <input type='date' id='end_date' style='width:70%'>";
+	echo "End: <input type='date' id='end_date' name='end_date' style='width:70%'>";
 	echo "</br>";
-
-//echo "<form action='upload.php' method='post' enctype='multipart/form-data'>";
-//echo "Select image to upload:";
 	echo "<div class='upload-btn-wrapper'>";
 	echo "<button class='btn'>Select a File</button>";
 	echo "<input type='file' name='fileToUpload' id='fileToUpload' class='submit'>";
 	echo "</div>";
-//Probably wont need this button
 	echo "</br>";
 	echo "</br>";
         echo "<div class='submit'>";
-        echo "<input id='config_input_button' type='button' name='check-config' value='UPLOAD' onclick='submission();' class='login-button' style='width: 90%;padding: 3%;font-size: 20px;' >";
+        echo "<input id='config_input_button' type='submit' name='check-config' value='UPLOAD' class='login-button' style='width: 90%;padding: 3%;font-size: 20px;' >";
+	echo "</form>";
 	echo "<h1 class='feedback' id='feedback-conf' style='font:unset !important; color:red; font-weight: bold !important;'></h1><br>";
         echo "<div align='center' class='copy-right'>";
 	echo "<p><a href='http://www.mjns.it' target='_blank'>MJ Network Solutions</a></p>";
+	echo "</br>";
+	echo "<p><a href='index.php?action=logout' id='logout'>Logout</a></p>";
         echo "</div>";
         echo "</div>";
         echo "</div>";
