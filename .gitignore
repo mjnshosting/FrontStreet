@@ -1,6 +1,10 @@
 /trash
-/content/**.jpg
-!/content/deomo-*.jpg
+/content/
+!/content/deomo-1.jpg
+!/content/deomo-2.jpg
+!/content/deomo-3.jpg
+!/content/deomo-4.jpg
+!/content/deomo-5.jpg
 *.sqlite3
 *.swp
 *.save
