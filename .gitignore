@@ -1,3 +1,4 @@
+*.jpg
 /trash
 /content/*
 !/content/deomo-1.jpg
