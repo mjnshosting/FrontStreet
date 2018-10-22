@@ -56,18 +56,13 @@ class OneFileLoginApplication
             $this->doRegistration();
             $this->showPageRegistration();
         } else if (isset($_GET["action"]) && $_GET["action"] == "submission") {
-/**
-            $this->performUserLoginAction();
-            if ($this->getUserLoginStatus()) {
-                $this->showPageLoggedIn();
-            } else {
-	        $this->showPageSubmission();
-            }
-**/
-	        $this->showPageSubmission();
-
+            $this->showPageSubmission();
+        } else if (isset($_GET["action"]) && $_GET["action"] == "manage") {
+            $this->showPageManage();
         } else if (isset($_GET["action"]) && $_GET["action"] == "upload") {
             $this->fileUpload();
+        } else if (isset($_GET["action"]) && $_GET["action"] == "remove") {
+            $this->removeUpload();
         } else {
             $this->doStartSession();
             $this->performUserLoginAction();
@@ -257,11 +252,19 @@ class OneFileLoginApplication
     }
 
     private function fileUpload() {
+/**
 	session_start();
 	if (empty($_SESSION['user_name'])) {
 	    header('Location: index.php');
 	    exit;
 	}
+**/
+        $content_type = $_POST['content_type'];
+        $ad_type = $_POST['ad_type'];
+        $duration = $_POST['duration'];
+        $start_date = strtotime($_POST['start_date']);
+        $end_date = strtotime($_POST['end_date']);
+        $file_name = basename( $_FILES["fileToUpload"]["name"]);
 	$target_dir = "../content/";
 	$target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
 	$uploadOk = 1;
@@ -283,8 +286,8 @@ class OneFileLoginApplication
     		$uploadOk = 0;
 	}
 
-	if ($_FILES["fileToUpload"]["size"] > 50000000) {
-    		echo "Sorry, your file is too large. </br> Max file size is 50MBs";
+	if ($_FILES["fileToUpload"]["size"] > 10000000) {
+    		echo "Sorry, your file is too large. </br> Max file size is 10MBs";
     		$uploadOk = 0;
 	}
 
@@ -300,19 +303,53 @@ class OneFileLoginApplication
 	if ($uploadOk == 0) {
     		echo "Sorry, your file was not uploaded.";
 	} else {
-    		if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
-        		echo "The file ". basename( $_FILES["fileToUpload"]["name"]). " has been uploaded.";
+		if ($this->createDatabaseConnection()) {
+	    		if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
+				$sql = 'INSERT INTO sliders (content_type, ad_type, duration, start_date, end_date, content)
+        		                VALUES(:content_type, :ad_type, :duration, :start_date, :end_date, :content)';
+	        	        $query = $this->db_connection->prepare($sql);
+	                	$query->bindValue(':content_type', $content_type);
+		                $query->bindValue(':ad_type', $ad_type);
+		                $query->bindValue(':duration', $duration);
+	        	        $query->bindValue(':start_date', $start_date);
+		                $query->bindValue(':end_date', $end_date);
+		                $query->bindValue(':content', $file_name);
+				$query->execute();
 
+				echo "Your Ad has been uploaded.";
+	    		} else {
+        			echo "Sorry, there was an error uploading your file.";
+    			}
+            	}
+	}
+    }
+
+    private function removeUpload() {
 /**
-	echo $_POST['content_type'];
-	echo $_POST['ad_type'];
-	echo strtotime($_POST['start_date']);
-	echo strtotime($_POST['end_date']);
-	echo basename( $_FILES["fileToUpload"]["name"]);
+	session_start();
+	if (empty($_SESSION['user_name'])) {
+	    header('Location: index.php');
+	    exit;
+	}
 **/
-    		} else {
-        		echo "Sorry, there was an error uploading your file.";
-    		}
+	$id = $_POST['id'];
+	if ($this->createDatabaseConnection()) {
+		//Search for file name
+    		$content_sql = "SELECT content FROM sliders WHERE sliders_id=" . $id;
+	        $query = $this->db_connection->prepare($content_sql);
+		$query->execute();
+
+		//Delete file
+		foreach($query as $row) {
+			unlink('../content/'.$row['content']);
+		}
+
+		//Delete DB entry
+    		$delete_sql = "DELETE FROM sliders WHERE sliders_id=" . $id;
+	        $query = $this->db_connection->prepare($delete_sql);
+		$query->execute();
+    	} else {
+		echo "Sorry, there was an error.";
 	}
     }
 
@@ -432,7 +469,7 @@ class OneFileLoginApplication
 **/
         echo "<html>";
         echo "<head>";
-        echo "<title>Front Street Submission</title>";
+        echo "<title>Ad Submission</title>";
         echo "<meta charset='utf-8'>";
 	echo "<link rel='icon' href='../images/favicon.ico' type='image/x-icon'>";
         echo "<link href='../css/login.css' rel='stylesheet' type='text/css' />";
@@ -444,8 +481,8 @@ class OneFileLoginApplication
         echo "<div class='main'>";
         echo "<div class='login-form'>";
 	echo "<div align='center'><img src='../images/logo.png' alt='Front Street' style='width:128px;height:auto;padding:10px;'></div>";
-        echo "<h1>Front Street</br>Submission</h1>";
-        echo "<div align='center' style='width: 70%; margin: 0 auto; padding: 6% 0 9% 0;'>";
+        echo "<h1>Ad Submission</h1>";
+        echo "<div align='center' style='width: 70%; margin: 0 auto;'>";
 	echo "<form id='uploadForm'>";
         echo "<select id='content_type' name='content_type'>";
 	echo "<option value=''>Select Content Type</option>";
@@ -460,10 +497,14 @@ class OneFileLoginApplication
 	echo "<option value='sale'>Sale</option>";
 	echo "<option value='announcement'>Announcement</option>";
         echo "</select>";
-	echo "Start: <input type='date' id='start_date' name='start_date' style='width:70%'>";
+	echo "<div align='right' style='width:100%'>";
+	echo "Duration: <input type='text' id='duration' name='duration' placeholder='min 10s/max 30s' style='width:65%'>";
 	echo "</br>";
-	echo "End: <input type='date' id='end_date' name='end_date' style='width:70%'>";
+	echo "Start: <input type='date' id='start_date' name='start_date' style='width:80%'>";
 	echo "</br>";
+	echo "End: <input type='date' id='end_date' name='end_date' style='width:80%'>";
+	echo "</br>";
+	echo "</div>";
 	echo "<div class='upload-btn-wrapper'>";
 	echo "<button class='btn'>Select a File</button>";
 	echo "<input type='file' name='fileToUpload' id='fileToUpload' class='submit'>";
@@ -475,10 +516,94 @@ class OneFileLoginApplication
 	echo "</form>";
 	echo "<h1 class='feedback' id='feedback-conf' style='font:unset !important; color:red; font-weight: bold !important;'></h1><br>";
         echo "<div align='center' class='copy-right'>";
-	echo "<p><a href='http://www.mjns.it' target='_blank'>MJ Network Solutions</a></p>";
-	echo "</br>";
-	echo "<p><a href='index.php?action=logout' id='logout'>Logout</a></p>";
+	echo "<p><a href='index.php?action=manage' id='manage'>Manage Ads</a>";
+//	echo " &#8226; <a href='http://www.mjns.it' target='_blank'>MJ Network Solutions</a>";
+	echo " &#8226; <a href='index.php?action=logout' id='logout'>Logout</a></p>";
         echo "</div>";
+        echo "</div>";
+        echo "</div>";
+        echo "</div>";
+        echo "</div>";
+	echo "<script src='../js/core.min.js'></script>";
+	echo "<script src='../js/fsap-login.js'></script>";
+        echo "</body>";
+        echo "</html>";
+    }
+
+    private function showPageManage()
+    {
+/**
+	session_start();
+	if (empty($_SESSION['user_name'])) {
+	    header('Location: index.php');
+	    exit;
+	}
+**/
+
+	if ($this->createDatabaseConnection()) {
+    		$sql = 'SELECT * FROM sliders';
+	        $query = $this->db_connection->prepare($sql);
+		$query->execute();
+    	} else {
+		echo "Sorry, there was an error";
+	}
+
+        echo "<html>";
+        echo "<head>";
+        echo "<title>Ad Management</title>";
+        echo "<meta charset='utf-8'>";
+	echo "<link rel='icon' href='../images/favicon.ico' type='image/x-icon'>";
+        echo "<link href='../css/login.css' rel='stylesheet' type='text/css' />";
+        echo "<meta name='viewport' content='width=device-width, initial-scale=1'>";
+        echo "<script type='application/x-javascript'> addEventListener('load', function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>";
+	echo "<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Lobster:200,300,400,600,700&amp;lang=en'>";
+        echo "</head>";
+        echo "<body>";
+        echo "<div class='main'>";
+        echo "<div class='login-form' style='width: 50%;'>";
+	echo "<div align='center'><img src='../images/logo.png' alt='Front Street' style='width:128px;height:auto;padding:10px;'></div>";
+        echo "<h1>Ad Management</h1>";
+        echo "<div align='center' style='width: 85%; margin: 0 auto;'>";
+	echo "</br>";
+
+	echo "<div style='overflow-x:auto; overflow-y:auto;' id='manage-list'>";
+	echo "<table>";
+	echo "<tr style='text-align:center'>";
+	echo "<th>Image</th>";
+	echo "<th>Content</th>";
+	echo "<th>Ad</th>";
+	echo "<th>Duration</th>";
+	echo "<th>Start</th>";
+	echo "<th>End</th>";
+	echo "<th> </th>";
+	echo "<th></th>";
+	echo "</tr>";
+
+	foreach($query as $row) {
+		echo "<tr style='text-align:center'>";
+		echo "<td style='padding: 5px; vertical-align: middle;'><img src='../content/" . $row['content'] . "' style='max-width: 90%;'></td>";
+		echo "<td style='padding: 10px; vertical-align: middle;'>" . $row['content_type'] . "</td>";
+		echo "<td style='padding: 10px; vertical-align: middle;'>" . $row['ad_type'] . "</td>";
+		echo "<td style='padding: 10px; vertical-align: middle;'>" . $row['duration'] . "s</td>";
+		echo "<td style='padding: 10px; vertical-align: middle;'>" . date('M/d/Y', $row['start_date']) . "</td>";
+		echo "<td style='padding: 10px; vertical-align: middle;'>" . date('M/d/Y', $row['end_date']) . "</td>";
+		echo "<td style='padding: 10px; vertical-align: middle;'></td>";
+		echo "<td style='padding: 10px; vertical-align: middle;'><input type='button' value='DELETE' class='delete-button' onclick='delete_ad(" . $row['sliders_id'] . ")'></td>";
+		echo "</tr>";
+		echo "</br>";
+	}
+
+	echo "</table>";
+	echo "</div>";
+
+	echo "<h1 class='feedback' id='feedback-conf' style='font:unset !important; color:red; font-weight: bold !important;'></h1><br>";
+
+	echo "</br>";
+        echo "<div align='center' class='copy-right' style='padding-bottom: 4.5%;'>";
+	echo "<p><a href='index.php?action=submission' id='logout'>Submit Ad</a>";
+	echo " &#8226; <a href='index.php?action=logout' id='logout'>Logout</a></p>";
+        echo "</div>";
+
         echo "</div>";
         echo "</div>";
         echo "</div>";

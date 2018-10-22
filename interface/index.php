@@ -14,8 +14,8 @@ try {
     // Set errormode to exceptions
     $memory_db->setAttribute(PDO::ATTR_ERRMODE,
                               PDO::ERRMODE_EXCEPTION);
-    // Query DB and create mac list text file that will show up in the iFrame
-//    $result = $file_db->query('SELECT * FROM sliders');
+    // Query DB and inject sliders
+    $result = $file_db->query('SELECT * FROM sliders');
 
 	echo "<html class='wide wow-animation scrollTo smoothscroll desktop landscape rd-navbar-static-linked' lang='en'>";
 	echo "<head>";
@@ -37,18 +37,12 @@ try {
 	echo "<!--Sliders Div-->";
 
 	// Output Lines
-/**
-	foreach($result as $row) {
-		echo "<!--Slider-->";
-    		echo "<div class='swiper-slide' id='page-loader' data-slide-bg='content/" . $row['content']  . "'></div>";
-		echo "<!--End Slider-->";
-    	}
-**/
-
-        echo "<div class='swiper-slide' id='page-loader' data-slide-bg='content/demo-1.jpg'></div>";
-        echo "<div class='swiper-slide' id='page-loader' data-slide-bg='content/demo-2.jpg'></div>";
-        echo "<div class='swiper-slide' id='page-loader' data-slide-bg='content/demo-3.jpg'></div>";
-        echo "<div class='swiper-slide' id='page-loader' data-slide-bg='content/demo-4.jpg'></div>";
+	
+		foreach($result as $row) {
+			echo "<!--Slider-->";
+    			echo "<div class='swiper-slide' id='page-loader' data-slide-bg='content/" . $row['content'] . "' data-swiper-autoplay='" . $row['duration']*1000 . "'></div>";
+			echo "<!--End Slider-->";
+    		}
 
 	echo "<!--End Sliders Div-->";
 	echo "</div>";

@@ -1,32 +1,40 @@
-var mySwiper = new Swiper ('.swiper-container', {
+//Find slider element, read attribute, change css
+if (plugins.swiper.length) {
+	plugins.swiper.each(function () {
+		var slider = $(this);
 
-                pagination: '.swiper-pagination',
-                paginationClickable: true,
+		slider.find(".swiper-slide")
+		.each( function () {
+			var $this = $(this), url;
+			if ( url = $this.attr("data-slide-bg") ) {
+				$this.css({
+					"background-image": "url(" + url + ")",
+					"background-repeat": "no-repeat",
+					"background-size": "contian"
+				})
+			}
+		})
+		.end()
+	});
+}
 
-                nextButton: '.swiper-button-next',
-                prevButton: '.swiper-button-prev',
+//Initialize Sliders
+var mySwiper = new Swiper('.swiper-container', {
+        // AutoPlay
+	autoplay: true,
+	spaceBetween: 0,
+        speed: 1200,
+        watchSlidesProgress: true,
+        watchVisibility: true,
+	loop: true,
 
-                // AutoPlay
-                autoplay: 2000,
-                speed: 1200,
-                watchSlidesProgress: true,
-                watchVisibility: true,
+        // Lazy Loading 
+        watchSlidesVisibility: true,
+        preloadImages: false,
+        lazyLoading: true,
 
-                // Loop
-                loop: true,
-
-                // Keyboard and Mousewheel
-                keyboardControl: false,
-                mousewheelControl: false,
-                mousewheelForceToAxis: false, 
-
-                // Lazy Loading 
-                watchSlidesVisibility: true,
-                preloadImages: false,
-                lazyLoading: true,
-
-		disableOnInteraction: false,
-            })
+	disableOnInteraction: false
+});
 
 $(document).ready(function(){
 });

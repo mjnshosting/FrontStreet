@@ -8,33 +8,55 @@ function create_user_db() {
         });
 }
 
+function delete_ad(id) {
+
+        $.ajax({
+            url: 'index.php?action=remove',
+            type: 'POST',
+	    data: {id : id},
+	    success: function () {
+		location.reload();
+	    }
+        });
+}
+
 $("form#uploadForm").submit(function(event){
 	event.preventDefault();
 	var feedback = document.getElementById("feedback-conf");
-  	var formData = new FormData($(this)[0]);
+	var content_type = document.getElementById("content_type");
+	var ad_type = document.getElementById("ad_type");
+	var duration = document.getElementById("duration");
+	var start_date = document.getElementById("start_date");
+	var end_date = document.getElementById("end_date");
+	var fileToUpload = document.getElementById("fileToUpload");
 
-//	if ($(content_type).val() && $(ad_type).val() && $(start_date).val() && $(end_date).val() && $(fileToUpload).val() != '') {
-	  $.ajax({
-	    url: 'index.php?action=upload',
-	    type: 'POST',
-	    data: formData,
-	    cache: false,
-	    contentType: false,
-	    processData: false,
-	    success: function (returnFormData) {
-			$('#feedback-conf').html(returnFormData);
-
-	    }
-	  });
-/**
+	if ($(content_type).val() && $(ad_type).val() && $(start_date).val() && $(end_date).val() && $(fileToUpload).val() != '') {
+		if ($(start_date).val() < $(end_date).val()) {
+			if (parseInt($(duration).val(),10) < 10 || !$.isNumeric($(duration).val()) ) {
+				document.getElementById("duration").value = 10;
+			} else if (parseInt($(duration).val(),10) > 30) {
+				document.getElementById("duration").value = 30;
+			}
+			  var formData = new FormData($(this)[0]);
+			  $.ajax({
+			    url: 'index.php?action=upload',
+			    type: 'POST',
+			    data: formData,
+			    cache: false,
+			    contentType: false,
+			    processData: false,
+			    success: function (returnFormData) {
+				$('#feedback-conf').html(returnFormData);
+			    }
+			  });
+		} else {
+			feedback.innerHTML = "Please correct the date range.";
+		}
 	} else {
 		feedback.innerHTML = "Please fill in all fields";
 	}
-**/
-
-
 	  return false;
-	});
+});
 
 
 function genRegular(x) {
@@ -57,19 +79,6 @@ function auto_generate_input(page) {
 		document.getElementById("login_input_password_repeat").setAttribute("type", "text");
 		document.getElementById("login_input_password_new").value = autoGenPass;
 		document.getElementById("login_input_password_repeat").value = autoGenPass;
-	}
-
-//For configuration page
-	if (page == 1) {
-		var autoGenName = "gbru_" + genRegular(8);
-		var autoGenPass = "gbrpw_" + genRegular(15);
-		var autoGenDB = "gbrdb_" + genRegular(8);
-		document.getElementById("config_input_gb_db_user").value = autoGenName;
-		document.getElementById("config_input_gb_db_password").setAttribute("type", "text");
-		document.getElementById("config_input_gb_db_password_repeat").setAttribute("type", "text");
-		document.getElementById("config_input_gb_db_password").value = autoGenPass;
-		document.getElementById("config_input_gb_db_password_repeat").value = autoGenPass;
-		document.getElementById("config_input_gb_db_name").value = autoGenDB;
 	}
 }
 
