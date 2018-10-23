@@ -1,6 +1,6 @@
 //Find slider element, read attribute, change css
-if (plugins.swiper.length) {
-	plugins.swiper.each(function () {
+if ($(".swiper-slider").length) {
+	$(".swiper-slider").each(function () {
 		var slider = $(this);
 
 		slider.find(".swiper-slide")
@@ -10,7 +10,7 @@ if (plugins.swiper.length) {
 				$this.css({
 					"background-image": "url(" + url + ")",
 					"background-repeat": "no-repeat",
-					"background-size": "contian"
+					"background-size": "cover"
 				})
 			}
 		})

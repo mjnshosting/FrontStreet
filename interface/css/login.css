@@ -194,6 +194,66 @@ input[type="submit"]:hover{
 	color:#fff;
 }
 
+.edit-button{
+	width: 95px;
+	padding: 1%;
+	background: #26baee;
+	font-family: 'Open Sans', sans-serif;
+	color: #ECECEC;
+	box-shadow: inset 0px 0px 10px #666464;
+	-webkit-text-shadow: 0px 0px 3px #000;
+	-moz-text-shadow: 0px 0px 3px #000;
+	-o-text-shadow: 0px 0px 3px #000;
+	-ms-text-shadow: 0px 0px 3px #000;
+	font-size: 20px;
+	outline: none;
+	border: none;
+	cursor: pointer;
+	font-weight:500;
+	border-radius: 5px;
+	transition: 0.5s;
+	-webkit-appearance:none;
+	-webkit-transition: 0.5s;
+	-moz-transition: 0.5s;
+	-o-transition: 0.5s;
+	-ms-transition: 0.5s;
+}
+
+.edit-button:hover{
+	background:#3ec2f0;
+	color:#fff;
+}
+
+.save-button{
+	width: 95px;
+	padding: 1%;
+	background: #26ee5a;
+	font-family: 'Open Sans', sans-serif;
+	color: #ECECEC;
+	box-shadow: inset 0px 0px 10px #666464;
+	-webkit-text-shadow: 0px 0px 3px #000;
+	-moz-text-shadow: 0px 0px 3px #000;
+	-o-text-shadow: 0px 0px 3px #000;
+	-ms-text-shadow: 0px 0px 3px #000;
+	font-size: 20px;
+	outline: none;
+	border: none;
+	cursor: pointer;
+	font-weight:500;
+	border-radius: 5px;
+	transition: 0.5s;
+	-webkit-appearance:none;
+	-webkit-transition: 0.5s;
+	-moz-transition: 0.5s;
+	-o-transition: 0.5s;
+	-ms-transition: 0.5s;
+}
+
+.save-button:hover{
+	background:#55f27e;
+	color:#fff;
+}
+
 .create_db {
 	width: 99%;
 	padding: 3%;

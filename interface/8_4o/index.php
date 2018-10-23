@@ -560,7 +560,7 @@ class OneFileLoginApplication
         echo "</head>";
         echo "<body>";
         echo "<div class='main'>";
-        echo "<div class='login-form' style='width: 50%;'>";
+        echo "<div class='login-form' style='width: 65%;'>";
 	echo "<div align='center'><img src='../images/logo.png' alt='Front Street' style='width:128px;height:auto;padding:10px;'></div>";
         echo "<h1>Ad Management</h1>";
         echo "<div align='center' style='width: 85%; margin: 0 auto;'>";
@@ -577,17 +577,24 @@ class OneFileLoginApplication
 	echo "<th>End</th>";
 	echo "<th> </th>";
 	echo "<th></th>";
+	echo "<th></th>";
 	echo "</tr>";
 
 	foreach($query as $row) {
 		echo "<tr style='text-align:center'>";
 		echo "<td style='padding: 5px; vertical-align: middle;'><img src='../content/" . $row['content'] . "' style='max-width: 90%;'></td>";
-		echo "<td style='padding: 10px; vertical-align: middle;'>" . $row['content_type'] . "</td>";
-		echo "<td style='padding: 10px; vertical-align: middle;'>" . $row['ad_type'] . "</td>";
-		echo "<td style='padding: 10px; vertical-align: middle;'>" . $row['duration'] . "s</td>";
-		echo "<td style='padding: 10px; vertical-align: middle;'>" . date('M/d/Y', $row['start_date']) . "</td>";
-		echo "<td style='padding: 10px; vertical-align: middle;'>" . date('M/d/Y', $row['end_date']) . "</td>";
-		echo "<td style='padding: 10px; vertical-align: middle;'></td>";
+		echo "<td style='padding: 10px; vertical-align: middle;' id='content-" . $row['content_type'] . "'>" . $row['content_type'] . "</td>";
+		echo "<td style='padding: 10px; vertical-align: middle;' id='ad-" . $row['ad_type'] . "'>" . $row['ad_type'] . "</td>";
+		echo "<td style='padding: 10px; vertical-align: middle;' id='duration-" . $row['duration'] . "'>" . $row['duration'] . "s</td>";
+		if (time() >= $row['start_date'] && time() <= $row['end_date']) {
+			echo "<td style='padding: 10px; vertical-align: middle; color: green; font-weight: bold;' id='start-" . $row['start_date'] . "'>" . date('M/d/Y', $row['start_date']) . "</td>";
+			echo "<td style='padding: 10px; vertical-align: middle; color: green; font-weight: bold;' id='end-" . $row['end_date'] . "'>" . date('M/d/Y', $row['end_date']) . "</td>";
+		} else {
+			echo "<td style='padding: 10px; vertical-align: middle; color: red; font-weight: bold;' id='start-" . $row['start_date'] . "'>" . date('M/d/Y', $row['start_date']) . "</td>";
+			echo "<td style='padding: 10px; vertical-align: middle; color: red; font-weight: bold;' id='end-" . $row['end_date'] . "'>" . date('M/d/Y', $row['end_date']) . "</td>";
+		}
+		echo "<td style='padding: 10px; vertical-align: middle;'><input type='button' value='SAVE' class='save-button' onclick='save_ad(" . $row['sliders_id'] . ")'></td>";
+		echo "<td style='padding: 10px; vertical-align: middle;'><input type='button' value='EDIT' class='edit-button' onclick='edit_ad(" . $row['sliders_id'] . ")'></td>";
 		echo "<td style='padding: 10px; vertical-align: middle;'><input type='button' value='DELETE' class='delete-button' onclick='delete_ad(" . $row['sliders_id'] . ")'></td>";
 		echo "</tr>";
 		echo "</br>";

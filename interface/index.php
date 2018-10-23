@@ -14,7 +14,7 @@ try {
     // Set errormode to exceptions
     $memory_db->setAttribute(PDO::ATTR_ERRMODE,
                               PDO::ERRMODE_EXCEPTION);
-    // Query DB and inject sliders
+    // Query DB to inject sliders
     $result = $file_db->query('SELECT * FROM sliders');
 
 	echo "<html class='wide wow-animation scrollTo smoothscroll desktop landscape rd-navbar-static-linked' lang='en'>";
@@ -24,8 +24,9 @@ try {
 	echo "<meta name='format-detection' content='telephone=no'>";
 	echo "<meta name='viewport' content='width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'>";
 	echo "<meta http-equiv='X-UA-Compatible' content='IE=Edge'>";
-	echo "<link rel='stylesheet' type='text/css' href='//fonts.googleapis.com/css?family=Montserrat:400,700%7CLato:300,300italic,400,700,900%7CYesteryear'>";
-	echo "<link rel='stylesheet' href='css/style.css'>";
+//	Use this when adding in dynamic and moving text to the project. For now its just pictures.
+//	echo "<link rel='stylesheet' type='text/css' href='//fonts.googleapis.com/css?family=Montserrat:400,700%7CLato:300,300italic,400,700,900%7CYesteryear'>";
+	echo "<link rel='stylesheet' href='css/style.uncss.css'>";
 	echo "</head>";
 	echo "<body>";
 	echo "<div class='page text-center'>";
@@ -36,13 +37,14 @@ try {
 	echo "<div class='swiper-wrapper text-center'>";
 	echo "<!--Sliders Div-->";
 
-	// Output Lines
-	
-		foreach($result as $row) {
+	// Output Sliders
+	foreach($result as $row) {
+		if (time() >= $row['start_date'] && time() <= $row['end_date']) {
 			echo "<!--Slider-->";
     			echo "<div class='swiper-slide' id='page-loader' data-slide-bg='content/" . $row['content'] . "' data-swiper-autoplay='" . $row['duration']*1000 . "'></div>";
 			echo "<!--End Slider-->";
-    		}
+		}
+	}
 
 	echo "<!--End Sliders Div-->";
 	echo "</div>";
@@ -51,8 +53,8 @@ try {
 	echo "</header>";
 	echo "</div>";
 	echo "<!-- Page Head-->";
-	echo "<script src='js/core.min.js'></script>";
-	echo "<script src='js/script.js'></script>";
+	echo "<script src='js/jquery.min.js'></script>";
+	echo "<script src='js/swiper4.min.js'></script>";
 	echo "<script src='js/fsap.js'></script>";
 	echo "</body>";
 	echo "</html>";
