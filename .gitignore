@@ -1,5 +1,5 @@
 /trash
-/content/*
+/content
 *.sqlite3
 *.swp
 *.save
