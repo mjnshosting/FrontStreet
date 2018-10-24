@@ -61,6 +61,10 @@ class OneFileLoginApplication
             $this->showPageManage();
         } else if (isset($_GET["action"]) && $_GET["action"] == "upload") {
             $this->fileUpload();
+        } else if (isset($_GET["action"]) && $_GET["action"] == "edit") {
+            $this->showEdit();
+        } else if (isset($_GET["action"]) && $_GET["action"] == "save") {
+            $this->saveEdit();
         } else if (isset($_GET["action"]) && $_GET["action"] == "remove") {
             $this->removeUpload();
         } else {
@@ -251,6 +255,17 @@ class OneFileLoginApplication
         return $this->user_is_logged_in;
     }
 
+    private function generateRandomString($length = 16)
+    {
+    	$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-';
+    	$charactersLength = strlen($characters);
+    	$randomString = '';
+    	for ($i = 0; $i < $length; $i++) {
+        	$randomString .= $characters[rand(0, $charactersLength - 1)];
+    	}
+	return $randomString;
+    }
+
     private function fileUpload() {
 /**
 	session_start();
@@ -262,11 +277,15 @@ class OneFileLoginApplication
         $content_type = $_POST['content_type'];
         $ad_type = $_POST['ad_type'];
         $duration = $_POST['duration'];
-        $start_date = strtotime($_POST['start_date']);
-        $end_date = strtotime($_POST['end_date']);
-        $file_name = basename( $_FILES["fileToUpload"]["name"]);
+	//Forgive the hack but strtotime always sets my time at 
+	//3AM local so I subtracted the time difference to make 
+	//it 12AM
+        $start_date = strtotime($_POST['start_date']) - 10800;
+        $end_date = strtotime($_POST['end_date']) - 10800;
+	//Randomize file names
+	$rangen_name = $this->generateRandomString() . "." . strtolower(pathinfo($_FILES["fileToUpload"]["name"],PATHINFO_EXTENSION));
 	$target_dir = "../content/";
-	$target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
+	$target_file = $target_dir . $rangen_name;
 	$uploadOk = 1;
 	$fileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
 
@@ -281,6 +300,7 @@ class OneFileLoginApplication
     		}
 	}
 
+	//Not needed since file names are random but I will keep it around.
 	if (file_exists($target_file)) {
     		echo "Sorry, file already exists.";
     		$uploadOk = 0;
@@ -304,6 +324,9 @@ class OneFileLoginApplication
     		echo "Sorry, your file was not uploaded.";
 	} else {
 		if ($this->createDatabaseConnection()) {
+			if (!file_exists($target_dir)) {
+			    mkdir($target_dir, 0755, true);
+			}
 	    		if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
 				$sql = 'INSERT INTO sliders (content_type, ad_type, duration, start_date, end_date, content)
         		                VALUES(:content_type, :ad_type, :duration, :start_date, :end_date, :content)';
@@ -313,7 +336,7 @@ class OneFileLoginApplication
 		                $query->bindValue(':duration', $duration);
 	        	        $query->bindValue(':start_date', $start_date);
 		                $query->bindValue(':end_date', $end_date);
-		                $query->bindValue(':content', $file_name);
+		                $query->bindValue(':content', $rangen_name);
 				$query->execute();
 
 				echo "Your Ad has been uploaded.";
@@ -324,6 +347,80 @@ class OneFileLoginApplication
 	}
     }
 
+
+
+    private function showEdit() {
+/**
+	session_start();
+	if (empty($_SESSION['user_name'])) {
+	    header('Location: index.php');
+	    exit;
+	}
+**/
+	$id = $_POST['id'];
+	if ($this->createDatabaseConnection()) {
+		//Search for file name
+    		$content_sql = "SELECT * FROM sliders WHERE sliders_id=" . $id;
+	        $query = $this->db_connection->prepare($content_sql);
+		$query->execute();
+
+		//Delete file
+		foreach($query as $row) {
+			echo "<td style='padding: 5px; vertical-align: middle;'><img src='../content/" . $row['content'] . "' style='max-width: 90%;'></td>";
+			echo "<td style='padding: 10px; vertical-align: middle;' id='content-td-" . $row['sliders_id'] . "'><select id='content_type-" . $row['sliders_id'] . "' name='content_type' style='font-size: 12px; width: 45px;'><option value='" . $row['content_type'] . "'>" . ucfirst($row['content_type']) . "</option><option value='image'>Image</option><option value='video'>Video</option></select></td>";
+			echo "<td style='padding: 10px; vertical-align: middle;' id='ad-td-" . $row['sliders_id'] . "'><select id='ad_type-" . $row['sliders_id'] . "' name='ad_type' style='font-size: 12px; width: 45px;'><option value='" . $row['ad_type'] . "'>" . ucfirst($row['ad_type']) . "</option><option value='tenant'>Tenant</option><option value='business'>Business</option><option value='sale'>Sale</option><option value='announcement'>Announcement</option></select></td>";
+			echo "<td style='padding: 10px; vertical-align: middle;' id='duration-td-" . $row['sliders_id'] . "'><input type='text' id='duration-" . $row['sliders_id'] . "' name='duration' value='" . $row['duration'] . "' style='font-size: 12px; width: 45px;'></td>";
+			echo "<td style='padding: 10px; vertical-align: middle;' id='start-td-" . $row['sliders_id'] . "'><input type='date' id='start_date-" . $row['sliders_id'] . "' name='start_date' style='font-size: 12px; width: 130px;'></td>";
+			echo "<td style='padding: 10px; vertical-align: middle;' id='end-td-" . $row['sliders_id'] . "'><input type='date' id='end_date-" . $row['sliders_id'] . "' name='end_date' style='font-size: 12px; width: 130px;'></td>";
+			echo "<td style='padding: 10px; vertical-align: middle;' id='feedback-td-" . $row['sliders_id'] . "'></td>";
+			echo "<td style='padding: 10px; vertical-align: middle;' id='toggle-td-" . $row['sliders_id'] . "'><input type='button' value='SAVE' class='save-button' onclick='save_ad(" . $row['sliders_id'] . ")'></td>";
+			echo "<td style='padding: 10px; vertical-align: middle;'><input type='button' value='DELETE' class='delete-button' onclick='delete_ad(" . $row['sliders_id'] . ")'></td>";
+		}
+    	} else {
+		echo "Sorry, there was an error.";
+	}
+    }
+
+/**
+    private function saveEdit() {
+	session_start();
+	if (empty($_SESSION['user_name'])) {
+	    header('Location: index.php');
+	    exit;
+	}
+        $content_type = $_POST['content_type'];
+        $ad_type = $_POST['ad_type'];
+        $duration = $_POST['duration'];
+	//Forgive the hack but strtotime always sets my time at 
+	//3AM local so I subtracted the time difference to make 
+	//it 12AM
+        $start_date = strtotime($_POST['start_date']) - 10800;
+        $end_date = strtotime($_POST['end_date']) - 10800;
+        $file_name = basename( $_FILES["fileToUpload"]["name"]);
+	$target_dir = "../content/";
+	$target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
+	$uploadOk = 1;
+	$fileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
+
+                if ($this->createDatabaseConnection()) {
+                        if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
+                                $sql = 'INSERT INTO sliders (content_type, ad_type, duration, start_date, end_date, content)
+                                        VALUES(:content_type, :ad_type, :duration, :start_date, :end_date, :content)';
+                                $query = $this->db_connection->prepare($sql);
+                                $query->bindValue(':content_type', $content_type);
+                                $query->bindValue(':ad_type', $ad_type);
+                                $query->bindValue(':duration', $duration);
+                                $query->bindValue(':start_date', $start_date);
+                                $query->bindValue(':end_date', $end_date);
+                                $query->bindValue(':content', $file_name);
+                                $query->execute();
+
+                                echo "Your Ad has been uploaded.";
+                        } else {
+                                echo "Sorry, there was an error uploading your file.";
+                        }
+                }
+**/
     private function removeUpload() {
 /**
 	session_start();
@@ -408,7 +505,7 @@ class OneFileLoginApplication
 	}
 	echo "</div>";
 	echo "</div>";
-	echo "<script src='../js/core.min.js'></script>";
+	echo "<script src='../js/jquery.min.js'></script>";
 	echo "<script src='../js/fsap-login.js'></script>";
 	echo "</body>";
 	echo "</html>";
@@ -452,7 +549,7 @@ class OneFileLoginApplication
         echo "</form>";
         echo "</div>";
         echo "</div>";
-	echo "<script src='../js/core.min.js'></script>";
+	echo "<script src='../js/jquery.min.js'></script>";
 	echo "<script src='../js/fsap-login.js'></script>";
         echo "</body>";
         echo "</html>";
@@ -524,7 +621,7 @@ class OneFileLoginApplication
         echo "</div>";
         echo "</div>";
         echo "</div>";
-	echo "<script src='../js/core.min.js'></script>";
+	echo "<script src='../js/jquery.min.js'></script>";
 	echo "<script src='../js/fsap-login.js'></script>";
         echo "</body>";
         echo "</html>";
@@ -565,7 +662,6 @@ class OneFileLoginApplication
         echo "<h1>Ad Management</h1>";
         echo "<div align='center' style='width: 85%; margin: 0 auto;'>";
 	echo "</br>";
-
 	echo "<div style='overflow-x:auto; overflow-y:auto;' id='manage-list'>";
 	echo "<table>";
 	echo "<tr style='text-align:center'>";
@@ -575,29 +671,28 @@ class OneFileLoginApplication
 	echo "<th>Duration</th>";
 	echo "<th>Start</th>";
 	echo "<th>End</th>";
-	echo "<th> </th>";
+	echo "<th></th>";
 	echo "<th></th>";
 	echo "<th></th>";
 	echo "</tr>";
 
 	foreach($query as $row) {
-		echo "<tr style='text-align:center'>";
+		echo "<tr id='tr-" . $row['sliders_id'] . "' style='text-align:center'>";
 		echo "<td style='padding: 5px; vertical-align: middle;'><img src='../content/" . $row['content'] . "' style='max-width: 90%;'></td>";
-		echo "<td style='padding: 10px; vertical-align: middle;' id='content-" . $row['content_type'] . "'>" . $row['content_type'] . "</td>";
-		echo "<td style='padding: 10px; vertical-align: middle;' id='ad-" . $row['ad_type'] . "'>" . $row['ad_type'] . "</td>";
-		echo "<td style='padding: 10px; vertical-align: middle;' id='duration-" . $row['duration'] . "'>" . $row['duration'] . "s</td>";
+		echo "<td style='padding: 10px; vertical-align: middle;' id='content-td-" . $row['sliders_id'] . "'>" . ucfirst($row['content_type']) . "</td>";
+		echo "<td style='padding: 10px; vertical-align: middle;' id='ad-td-" . $row['sliders_id'] . "'>" . ucfirst($row['ad_type']) . "</td>";
+		echo "<td style='padding: 10px; vertical-align: middle;' id='duration-td-" . $row['sliders_id'] . "'>" . $row['duration'] . "s</td>";
 		if (time() >= $row['start_date'] && time() <= $row['end_date']) {
-			echo "<td style='padding: 10px; vertical-align: middle; color: green; font-weight: bold;' id='start-" . $row['start_date'] . "'>" . date('M/d/Y', $row['start_date']) . "</td>";
-			echo "<td style='padding: 10px; vertical-align: middle; color: green; font-weight: bold;' id='end-" . $row['end_date'] . "'>" . date('M/d/Y', $row['end_date']) . "</td>";
+			echo "<td style='padding: 10px; vertical-align: middle; color: green; font-weight: bold;' id='start-td-" . $row['sliders_id'] . "'>" . date('M/d/Y', $row['start_date']) . "</td>";
+			echo "<td style='padding: 10px; vertical-align: middle; color: green; font-weight: bold;' id='end-td-" . $row['sliders_id'] . "'>" . date('M/d/Y', $row['end_date']) . "</td>";
 		} else {
-			echo "<td style='padding: 10px; vertical-align: middle; color: red; font-weight: bold;' id='start-" . $row['start_date'] . "'>" . date('M/d/Y', $row['start_date']) . "</td>";
-			echo "<td style='padding: 10px; vertical-align: middle; color: red; font-weight: bold;' id='end-" . $row['end_date'] . "'>" . date('M/d/Y', $row['end_date']) . "</td>";
+			echo "<td style='padding: 10px; vertical-align: middle; color: red; font-weight: bold;' id='start-td-" . $row['sliders_id'] . "'>" . date('M/d/Y', $row['start_date']) . "</td>";
+			echo "<td style='padding: 10px; vertical-align: middle; color: red; font-weight: bold;' id='end-td-" . $row['sliders_id'] . "'>" . date('M/d/Y', $row['end_date']) . "</td>";
 		}
-		echo "<td style='padding: 10px; vertical-align: middle;'><input type='button' value='SAVE' class='save-button' onclick='save_ad(" . $row['sliders_id'] . ")'></td>";
-		echo "<td style='padding: 10px; vertical-align: middle;'><input type='button' value='EDIT' class='edit-button' onclick='edit_ad(" . $row['sliders_id'] . ")'></td>";
+		echo "<td style='padding: 10px; vertical-align: middle;' id='feedback-td-" . $row['sliders_id'] . "'></td>";
+		echo "<td style='padding: 10px; vertical-align: middle;' id='toggle-td-" . $row['sliders_id'] . "'><input type='button' value='EDIT' class='edit-button' onclick='edit_ad(" . $row['sliders_id'] . ")'></td>";
 		echo "<td style='padding: 10px; vertical-align: middle;'><input type='button' value='DELETE' class='delete-button' onclick='delete_ad(" . $row['sliders_id'] . ")'></td>";
 		echo "</tr>";
-		echo "</br>";
 	}
 
 	echo "</table>";
@@ -615,7 +710,7 @@ class OneFileLoginApplication
         echo "</div>";
         echo "</div>";
         echo "</div>";
-	echo "<script src='../js/core.min.js'></script>";
+	echo "<script src='../js/jquery.min.js'></script>";
 	echo "<script src='../js/fsap-login.js'></script>";
         echo "</body>";
         echo "</html>";
