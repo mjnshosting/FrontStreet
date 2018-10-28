@@ -10,7 +10,7 @@ if ($(".swiper-slider").length) {
 				$this.css({
 					"background-image": "url(" + url + ")",
 					"background-repeat": "no-repeat",
-					"background-size": "cover"
+					"background-size": "auto"
 				})
 			}
 		})

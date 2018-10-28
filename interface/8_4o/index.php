@@ -277,11 +277,8 @@ class OneFileLoginApplication
         $content_type = $_POST['content_type'];
         $ad_type = $_POST['ad_type'];
         $duration = $_POST['duration'];
-	//Forgive the hack but strtotime always sets my time at 
-	//3AM local so I subtracted the time difference to make 
-	//it 12AM
-        $start_date = strtotime($_POST['start_date']) - 10800;
-        $end_date = strtotime($_POST['end_date']) - 10800;
+        $start_date = strtotime($_POST['start_date']);
+        $end_date = strtotime($_POST['end_date']);
 	//Randomize file names
 	$rangen_name = $this->generateRandomString() . "." . strtolower(pathinfo($_FILES["fileToUpload"]["name"],PATHINFO_EXTENSION));
 	$target_dir = "../content/";
@@ -394,8 +391,8 @@ class OneFileLoginApplication
 	//Forgive the hack but strtotime always sets my time at 
 	//3AM local so I subtracted the time difference to make 
 	//it 12AM
-        $start_date = strtotime($_POST['start_date']) - 10800;
-        $end_date = strtotime($_POST['end_date']) - 10800;
+        $start_date = strtotime($_POST['start_date']);
+        $end_date = strtotime($_POST['end_date']);
         $file_name = basename( $_FILES["fileToUpload"]["name"]);
 	$target_dir = "../content/";
 	$target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
