@@ -47,7 +47,7 @@ try {
 	// Output Sliders
 	$x = 0;
 	//I usually change this while testing. Default: 1000 - convert milliseconds to seconds.
-	$slide_duration = 10;
+	$slide_duration = 1000;
 	while ($x <= $count_sliders) {
 		foreach ($tenant_sliders as $row) {
     			if (time() >= $row['start_date'] && time() <= $row['end_date'] && $row['ad_type'] == 'tenant') {

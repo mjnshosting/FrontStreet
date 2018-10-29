@@ -23,7 +23,7 @@ function edit_ad(id) {
 	    data: {id : id},
             success: function (data) {
 		document.getElementById("tr-" + id).innerHTML = data;
-                            }
+            }
         });
 }
 
@@ -47,12 +47,9 @@ function save_ad(id) {
                           $.ajax({
                             url: 'index.php?action=save',
                             type: 'POST',
-                            data: {content_type: content_type, ad_type: ad_type, start_date: start_date, end_date: end_date},
-                            cache: false,
-                            contentType: false,
-                            processData: false,
-                            success: function () {
-				toggletd.innerHTML = "<input type='button' value='EDIT' class='edit-button' onclick='edit_ad(" + id + ")'>";
+                            data: {id: id, content_type: content_type.value, ad_type: ad_type.value, duration: duration.value, start_date: start_date.value, end_date: end_date.value},
+                            success: function (data) {
+				document.getElementById("tr-" + id).innerHTML = data;
                             }
                           });
 		} else {
@@ -100,8 +97,8 @@ $("form#uploadForm").submit(function(event){
 			    cache: false,
 			    contentType: false,
 			    processData: false,
-			    success: function (returnFormData) {
-				$('#feedback-conf').html(returnFormData);
+			    success: function (data) {
+				$('#feedback-conf').html(data);
 			    }
 			  });
 		} else {

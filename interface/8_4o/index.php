@@ -367,8 +367,8 @@ class OneFileLoginApplication
 			echo "<td style='padding: 10px; vertical-align: middle;' id='content-td-" . $row['sliders_id'] . "'><select id='content_type-" . $row['sliders_id'] . "' name='content_type' style='font-size: 12px; width: 45px;'><option value='" . $row['content_type'] . "'>" . ucfirst($row['content_type']) . "</option><option value='image'>Image</option><option value='video'>Video</option></select></td>";
 			echo "<td style='padding: 10px; vertical-align: middle;' id='ad-td-" . $row['sliders_id'] . "'><select id='ad_type-" . $row['sliders_id'] . "' name='ad_type' style='font-size: 12px; width: 45px;'><option value='" . $row['ad_type'] . "'>" . ucfirst($row['ad_type']) . "</option><option value='tenant'>Tenant</option><option value='business'>Business</option><option value='sale'>Sale</option><option value='announcement'>Announcement</option></select></td>";
 			echo "<td style='padding: 10px; vertical-align: middle;' id='duration-td-" . $row['sliders_id'] . "'><input type='text' id='duration-" . $row['sliders_id'] . "' name='duration' value='" . $row['duration'] . "' style='font-size: 12px; width: 45px;'></td>";
-			echo "<td style='padding: 10px; vertical-align: middle;' id='start-td-" . $row['sliders_id'] . "'><input type='date' id='start_date-" . $row['sliders_id'] . "' name='start_date' style='font-size: 12px; width: 130px;'></td>";
-			echo "<td style='padding: 10px; vertical-align: middle;' id='end-td-" . $row['sliders_id'] . "'><input type='date' id='end_date-" . $row['sliders_id'] . "' name='end_date' style='font-size: 12px; width: 130px;'></td>";
+			echo "<td style='padding: 10px; vertical-align: middle;' id='start-td-" . $row['sliders_id'] . "'><input type='date' id='start_date-" . $row['sliders_id'] . "' name='start_date' style='font-size: 12px; width: 130px;' value='" . date('Y-m-d', $row['start_date']) . "'></td>";
+			echo "<td style='padding: 10px; vertical-align: middle;' id='end-td-" . $row['sliders_id'] . "'><input type='date' id='end_date-" . $row['sliders_id'] . "' name='end_date' style='font-size: 12px; width: 130px;' value='" . date('Y-m-d', $row['end_date']) . "'></td>";
 			echo "<td style='padding: 10px; vertical-align: middle;' id='feedback-td-" . $row['sliders_id'] . "'></td>";
 			echo "<td style='padding: 10px; vertical-align: middle;' id='toggle-td-" . $row['sliders_id'] . "'><input type='button' value='SAVE' class='save-button' onclick='save_ad(" . $row['sliders_id'] . ")'></td>";
 			echo "<td style='padding: 10px; vertical-align: middle;'><input type='button' value='DELETE' class='delete-button' onclick='delete_ad(" . $row['sliders_id'] . ")'></td>";
@@ -378,46 +378,52 @@ class OneFileLoginApplication
 	}
     }
 
-/**
     private function saveEdit() {
+/**
 	session_start();
 	if (empty($_SESSION['user_name'])) {
 	    header('Location: index.php');
 	    exit;
 	}
+**/
+	$sliders_id = $_POST['id'];
         $content_type = $_POST['content_type'];
         $ad_type = $_POST['ad_type'];
         $duration = $_POST['duration'];
-	//Forgive the hack but strtotime always sets my time at 
-	//3AM local so I subtracted the time difference to make 
-	//it 12AM
         $start_date = strtotime($_POST['start_date']);
         $end_date = strtotime($_POST['end_date']);
-        $file_name = basename( $_FILES["fileToUpload"]["name"]);
-	$target_dir = "../content/";
-	$target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
-	$uploadOk = 1;
-	$fileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
 
-                if ($this->createDatabaseConnection()) {
-                        if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
-                                $sql = 'INSERT INTO sliders (content_type, ad_type, duration, start_date, end_date, content)
-                                        VALUES(:content_type, :ad_type, :duration, :start_date, :end_date, :content)';
-                                $query = $this->db_connection->prepare($sql);
-                                $query->bindValue(':content_type', $content_type);
-                                $query->bindValue(':ad_type', $ad_type);
-                                $query->bindValue(':duration', $duration);
-                                $query->bindValue(':start_date', $start_date);
-                                $query->bindValue(':end_date', $end_date);
-                                $query->bindValue(':content', $file_name);
-                                $query->execute();
+        if ($this->createDatabaseConnection()) {
+		//Update record
+	       	$write = "UPDATE sliders SET content_type = '" . $content_type . "', ad_type = '" . $ad_type . "', duration = '" . $duration . "', start_date = '" . $start_date . "', end_date = '" . $end_date . "' WHERE sliders_id = " . $sliders_id . "";
+                $query = $this->db_connection->prepare($write);
+                $query->execute();
+		//Get updated record
+    		$read = "SELECT * FROM sliders WHERE sliders_id = " . $sliders_id . "";
+	        $query = $this->db_connection->prepare($read);
+                $query->execute();
 
-                                echo "Your Ad has been uploaded.";
-                        } else {
-                                echo "Sorry, there was an error uploading your file.";
-                        }
-                }
-**/
+		foreach($query as $row) {
+			echo "<td style='padding: 5px; vertical-align: middle;'><img src='../content/" . $row['content'] . "' style='max-width: 90%;'></td>";
+			echo "<td style='padding: 10px; vertical-align: middle;' id='content-td-" . $row['sliders_id'] . "'>" . ucfirst($row['content_type']) . "</td>";
+			echo "<td style='padding: 10px; vertical-align: middle;' id='ad-td-" . $row['sliders_id'] . "'>" . ucfirst($row['ad_type']) . "</td>";
+			echo "<td style='padding: 10px; vertical-align: middle;' id='duration-td-" . $row['sliders_id'] . "'>" . $row['duration'] . "s</td>";
+			if (time() >= $row['start_date'] && time() <= $row['end_date']) {
+				echo "<td style='padding: 10px; vertical-align: middle; color: green; font-weight: bold;' id='start-td-" . $row['sliders_id'] . "'>" . date('M/d/Y', $row['start_date']) . "</td>";
+				echo "<td style='padding: 10px; vertical-align: middle; color: green; font-weight: bold;' id='end-td-" . $row['sliders_id'] . "'>" . date('M/d/Y', $row['end_date']) . "</td>";
+			} else {
+				echo "<td style='padding: 10px; vertical-align: middle; color: red; font-weight: bold;' id='start-td-" . $row['sliders_id'] . "'>" . date('M/d/Y', $row['start_date']) . "</td>";
+				echo "<td style='padding: 10px; vertical-align: middle; color: red; font-weight: bold;' id='end-td-" . $row['sliders_id'] . "'>" . date('M/d/Y', $row['end_date']) . "</td>";
+			}
+			echo "<td style='padding: 10px; vertical-align: middle; color: green;' id='feedback-td-" . $row['sliders_id'] . "'>Saved</td>";
+			echo "<td style='padding: 10px; vertical-align: middle;' id='toggle-td-" . $row['sliders_id'] . "'><input type='button' value='EDIT' class='edit-button' onclick='edit_ad(" . $row['sliders_id'] . ")'></td>";
+			echo "<td style='padding: 10px; vertical-align: middle;'><input type='button' value='DELETE' class='delete-button' onclick='delete_ad(" . $row['sliders_id'] . ")'></td>";
+		}
+        } else {
+        	echo "Connection Error";
+        }
+    }
+
     private function removeUpload() {
 /**
 	session_start();
