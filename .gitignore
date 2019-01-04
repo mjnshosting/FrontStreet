@@ -2,6 +2,8 @@
 *.swp
 *.save
 *.jpg
+*.gif
+*.jpeg
 *.png
 /trash
 /content
