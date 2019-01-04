@@ -267,13 +267,11 @@ class OneFileLoginApplication
     }
 
     private function fileUpload() {
-/**
 	session_start();
 	if (empty($_SESSION['user_name'])) {
 	    header('Location: index.php');
 	    exit;
 	}
-**/
         $content_type = $_POST['content_type'];
         $ad_type = $_POST['ad_type'];
         $duration = $_POST['duration'];
@@ -347,13 +345,11 @@ class OneFileLoginApplication
 
 
     private function showEdit() {
-/**
 	session_start();
 	if (empty($_SESSION['user_name'])) {
 	    header('Location: index.php');
 	    exit;
 	}
-**/
 	$id = $_POST['id'];
 	if ($this->createDatabaseConnection()) {
 		//Search for file name
@@ -379,13 +375,11 @@ class OneFileLoginApplication
     }
 
     private function saveEdit() {
-/**
 	session_start();
 	if (empty($_SESSION['user_name'])) {
 	    header('Location: index.php');
 	    exit;
 	}
-**/
 	$sliders_id = $_POST['id'];
         $content_type = $_POST['content_type'];
         $ad_type = $_POST['ad_type'];
@@ -425,13 +419,11 @@ class OneFileLoginApplication
     }
 
     private function removeUpload() {
-/**
 	session_start();
 	if (empty($_SESSION['user_name'])) {
 	    header('Location: index.php');
 	    exit;
 	}
-**/
 	$id = $_POST['id'];
 	if ($this->createDatabaseConnection()) {
 		//Search for file name
@@ -560,13 +552,11 @@ class OneFileLoginApplication
 
     private function showPageSubmission()
     {
-/**
 	session_start();
 	if (empty($_SESSION['user_name'])) {
 	    header('Location: index.php');
 	    exit;
 	}
-**/
         echo "<html>";
         echo "<head>";
         echo "<title>Ad Submission</title>";
@@ -617,7 +607,6 @@ class OneFileLoginApplication
 	echo "<h1 class='feedback' id='feedback-conf' style='font:unset !important; color:red; font-weight: bold !important;'></h1><br>";
         echo "<div align='center' class='copy-right'>";
 	echo "<p><a href='index.php?action=manage' id='manage'>Manage Ads</a>";
-//	echo " &#8226; <a href='http://www.mjns.it' target='_blank'>MJ Network Solutions</a>";
 	echo " &#8226; <a href='index.php?action=logout' id='logout'>Logout</a></p>";
         echo "</div>";
         echo "</div>";
@@ -632,13 +621,11 @@ class OneFileLoginApplication
 
     private function showPageManage()
     {
-/**
 	session_start();
 	if (empty($_SESSION['user_name'])) {
 	    header('Location: index.php');
 	    exit;
 	}
-**/
 
 	if ($this->createDatabaseConnection()) {
     		$sql = 'SELECT * FROM sliders';

@@ -2,6 +2,7 @@ v.5 - 10/29/18
 # Features to add later:
 - Per user access (Because Gee doenst want me to sleep)
 - Multi-File Upload
+- Roku Controller for each device or for different zones
 
 # TODO:
 - Review code to see if there are better ways to implement the solution
